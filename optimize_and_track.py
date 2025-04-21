@@ -24,7 +24,13 @@ portfolio_value = st.number_input("Total Portfolio Value (USD)", value=10000)
 # Get 3 months of daily returns for optimization
 end = datetime.today()
 start = end - timedelta(days=90)
-price_data = yf.download(tickers, start=start, end=end)["Adj Close"]
+
+raw_data = yf.download(tickers, start=start, end=end)
+if isinstance(raw_data.columns, pd.MultiIndex):
+    price_data = raw_data["Adj Close"] if "Adj Close" in raw_data.columns.levels[0] else raw_data["Close"]
+else:
+    price_data = raw_data
+
 returns = price_data.pct_change().dropna()
 
 mean_returns = returns.mean().values
